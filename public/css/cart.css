@@ -1,0 +1,142 @@
+.cart-page {
+    padding: 30px 40px;
+}
+
+.btn-kembali {
+    display: inline-block;
+    margin-bottom: 15px;
+
+    background: #eee;
+    color: #333;
+    padding: 8px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+
+    transition: 0.3s;
+}
+
+.btn-kembali:hover {
+    background: #ddd;
+}
+
+.cart-page h1 {
+    margin-bottom: 25px;
+}
+
+.cart-container {
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f8f8f8;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+}
+
+td {
+    padding: 12px;
+    text-align: center;
+    border-top: 1px solid #eee;
+}
+
+tr:hover {
+    background: #fafafa;
+}
+
+.cart-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-top: 20px;
+}
+
+.total {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.btn-checkout {
+    background: #b68d40;
+    color: white;
+    padding: 10px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+
+    transition: 0.3s;
+}
+
+.btn-checkout:hover {
+    background: #a07c35;
+}
+
+.btn-checkout {
+    display: inline-block;
+    margin-top: 15px;
+
+    background: #b68d40;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+
+    transition: 0.3s;
+}
+
+.btn-checkout:hover {
+    background: #a07c35;
+}
+
+.empty {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #777;
+}
+
+.btn-hapus {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-hapus:hover {
+    background: #c0392b;
+}
+
+.qty-control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.qty-control button {
+    padding: 5px 12px;
+    border: none;
+    background: #eee;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.qty-control button:hover {
+    background: #ddd;
+}
+
+.jumlah {
+    font-weight: bold;
+}
