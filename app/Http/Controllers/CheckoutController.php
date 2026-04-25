@@ -53,8 +53,67 @@ class CheckoutController extends Controller
 
         Mail::to('cobacobadulu148@gmail.com')->send(new OrderMail($order, $cart));
 
+        $this->notifAdmin($order);
+
         session()->forget('cart');
 
         return redirect('/produk?status=success');
+    }
+
+    private function formatNomor($nomor)
+    {
+        $nomor = preg_replace('/[^0-9]/', '', $nomor);
+
+        if (substr($nomor, 0, 1) == '0') {
+            $nomor = '62' . substr($nomor, 1);
+        }
+
+        return $nomor;
+    }
+
+    private function notifAdmin($order)
+    {
+        $nomor = $this->formatNomor(env('ADMIN_WA'));
+
+        $pesan = "ORDER BARU MASUK\n\n";
+
+        $pesan .= "Nama: {$order->nama}\n";
+        $pesan .= "No HP: {$order->telepon}\n";
+        $pesan .= "Alamat: {$order->alamat}\n\n";
+
+        $pesan .= "Detail Pesanan:\n";
+
+        foreach ($order->items as $item) {
+            $pesan .= "- {$item->nama} x{$item->jumlah}\n";
+        }
+
+        $pesan .= "\nTotal: Rp " . number_format($order->total);
+
+        $pesan .= "\n\nCek di: " . url('/admin/pesanan');
+
+        $this->kirimWhatsApp($nomor, $pesan);
+    }
+
+    private function kirimWhatsApp($nomor, $pesan)
+    {
+        $token = env('FONNTE_TOKEN');
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => "https://api.fonnte.com/send",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => [
+                'target' => $nomor,
+                'message' => $pesan,
+            ],
+            CURLOPT_HTTPHEADER => [
+                "Authorization: $token"
+            ],
+        ]);
+
+        curl_exec($curl);
+        curl_close($curl);
     }
 }

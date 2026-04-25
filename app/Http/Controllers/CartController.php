@@ -17,7 +17,7 @@ class CartController extends Controller
             unset($cart[$produk->id]);
         } else {
             $cart[$produk->id] = [
-                "id" => $produk->id, // TAMBAHAN
+                "id" => $produk->id,
                 "nama" => $produk->nama,
                 "harga" => $produk->harga,
                 "gambar" => $produk->gambar,
@@ -33,7 +33,7 @@ class CartController extends Controller
     public function index()
     {
         $cart = session()->get('cart', []);
-        return view('cart', compact('cart')); // FIX
+        return view('cart', compact('cart'));
     }
 
     public function remove(Request $request)

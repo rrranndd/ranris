@@ -128,7 +128,6 @@
     Total: Rp {{ number_format($totalPendapatan) }}
 </div>
 
-<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
