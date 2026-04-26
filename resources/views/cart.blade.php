@@ -23,33 +23,46 @@
         <div class="cart-container">
 
             <table>
-                <tr>
-                    <th>Produk</th>
-                    <th>Harga</th>
-                    <th>Jumlah</th>
-                    <th>Total</th>
-                </tr>
-
-                @php $total = 0; @endphp
-
-                @foreach($cart as $item)
-                    @php 
-                        $subtotal = $item['harga'] * $item['jumlah']; 
-                        $total += $subtotal; 
-                    @endphp
+                <thead>
                     <tr>
-                        <td>{{ $item['nama'] }}</td>
-                        <td>Rp {{ number_format($item['harga']) }}</td>
-                        <td class="qty-cell">
-                            <div class="qty-control" data-id="{{ $item['id'] }}">
-                                <button class="minus">-</button>
-                                <span class="jumlah">{{ $item['jumlah'] }}</span>
-                                <button class="plus">+</button>
-                            </div>
-                        </td>
-                        <td>Rp {{ number_format($subtotal) }}</td>
+                        <th>Produk</th>
+                        <th>Harga</th>
+                        <th>Jumlah</th>
+                        <th>Total</th>
                     </tr>
-                @endforeach
+                </thead>
+
+                <tbody>
+                    @php $total = 0; @endphp
+
+                    @foreach($cart as $item)
+                        @php 
+                            $subtotal = $item['harga'] * $item['jumlah']; 
+                            $total += $subtotal; 
+                        @endphp
+
+                        <tr>
+                            <td data-label="Produk">{{ $item['nama'] }}</td>
+
+                            <td data-label="Harga">
+                                Rp {{ number_format($item['harga']) }}
+                            </td>
+
+                            <td data-label="Jumlah" class="qty-cell">
+                                <div class="qty-control" data-id="{{ $item['id'] }}">
+                                    <button class="minus">-</button>
+                                    <span class="jumlah">{{ $item['jumlah'] }}</span>
+                                    <button class="plus">+</button>
+                                </div>
+                            </td>
+
+                            <td data-label="Total">
+                                Rp {{ number_format($subtotal) }}
+                            </td>
+                        </tr>
+
+                    @endforeach
+                </tbody>
             </table>
 
         </div>
@@ -58,8 +71,12 @@
             <h2 class="total">
                 Total: Rp <span id="total-harga">{{ number_format($total) }}</span>
             </h2>
-            <a href="/checkout" class="btn-checkout">Checkout</a>
+
+            <a href="/checkout" class="btn-checkout">
+                Checkout
+            </a>
         </div>
+
     @else
         <p class="empty">Keranjang kosong</p>
     @endif

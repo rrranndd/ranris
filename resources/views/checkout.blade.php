@@ -54,7 +54,7 @@
                     $total += $subtotal; 
                 @endphp
 
-                <div class="summary-item">
+                <div class="summary-item item-line">
                     <span>{{ $item['nama'] }} x{{ $item['jumlah'] }}</span>
                     <span>Rp {{ number_format($subtotal) }}</span>
                 </div>

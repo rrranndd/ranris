@@ -7,8 +7,6 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Mail\OrderMail;
 use Illuminate\Support\Facades\Mail;
-
-// MIDTRANS
 use Midtrans\Snap;
 use Midtrans\Config;
 
@@ -36,13 +34,11 @@ class CheckoutController extends Controller
                 'payment_method' => 'required',
             ]);
 
-            // HITUNG TOTAL
             $total = 0;
             foreach ($cart as $item) {
                 $total += $item['harga'] * $item['jumlah'];
             }
 
-            // SIMPAN ORDER
             $order = Order::create([
                 'nama' => $request->nama,
                 'telepon' => $request->telepon,
@@ -54,7 +50,6 @@ class CheckoutController extends Controller
                 'payment_status' => 'pending'
             ]);
 
-            // SIMPAN ITEM
             foreach ($cart as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -64,11 +59,9 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            // 🔥 EMAIL + WA
             Mail::to('cobacobadulu148@gmail.com')->send(new OrderMail($order, $cart));
             $this->notifAdmin($order);
 
-            // 🟢 COD
             if ($request->payment_method == 'cod') {
                 session()->forget('cart');
 
@@ -77,7 +70,6 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            // 🔵 MIDTRANS
             Config::$serverKey = config('midtrans.serverKey');
             Config::$isProduction = false;
             Config::$isSanitized = true;
@@ -121,10 +113,6 @@ class CheckoutController extends Controller
             ], 500);
         }
     }
-
-    // =========================
-    // WHATSAPP
-    // =========================
 
     private function formatNomor($nomor)
     {
@@ -181,7 +169,6 @@ class CheckoutController extends Controller
 
         curl_close($curl);
 
-        // LOG saja (tidak menghentikan program)
         \Log::info($response);
     }
 }

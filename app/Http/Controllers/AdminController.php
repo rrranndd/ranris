@@ -33,10 +33,9 @@ class AdminController extends Controller
         ));
     }
 
-    // 🔥 AUTO FORMAT NOMOR
     private function formatNomor($nomor)
     {
-        $nomor = preg_replace('/[^0-9]/', '', $nomor); // hapus selain angka
+        $nomor = preg_replace('/[^0-9]/', '', $nomor);
 
         if (substr($nomor, 0, 1) == '0') {
             $nomor = '62' . substr($nomor, 1);
@@ -58,7 +57,6 @@ class AdminController extends Controller
             'message' => $pesan,
         ];
 
-        // 🔥 FIX KIRIM FILE
         if ($file) {
             $data['file'] = $file;
             $data['filename'] = 'invoice.pdf';
@@ -91,13 +89,10 @@ class AdminController extends Controller
 
         $nomor = $this->formatNomor($order->telepon);
 
-        // generate PDF
         $file = $this->generateInvoicePDF($order);
 
-        // 🔥 pakai format pesan lengkap
         $pesan = $this->formatPesanTerima($order);
 
-        // tambahkan info invoice
         $pesan .= "\n\nInvoice terlampir.";
 
         $this->kirimWhatsApp($nomor, $pesan, $file);
@@ -325,7 +320,6 @@ class AdminController extends Controller
         $filename = 'invoice_' . $order->id . '.pdf';
         $path = public_path('invoice/' . $filename);
 
-        // pastikan folder ada
         if (!file_exists(public_path('invoice'))) {
             mkdir(public_path('invoice'), 0777, true);
         }
