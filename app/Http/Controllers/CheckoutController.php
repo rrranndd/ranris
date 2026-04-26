@@ -8,6 +8,10 @@ use App\Models\OrderItem;
 use App\Mail\OrderMail;
 use Illuminate\Support\Facades\Mail;
 
+// MIDTRANS
+use Midtrans\Snap;
+use Midtrans\Config;
+
 class CheckoutController extends Controller
 {
     public function index()
@@ -17,48 +21,110 @@ class CheckoutController extends Controller
 
     public function store(Request $request)
     {
-        $cart = session()->get('cart', []);
+        try {
 
-        if (!$cart || count($cart) == 0) {
-            return redirect('/produk');
-        }
+            $cart = session()->get('cart', []);
 
-        $request->validate([
-            'nama' => 'required',
-            'telepon' => 'required',
-            'alamat' => 'required',
-        ]);
+            if (!$cart || count($cart) == 0) {
+                return response()->json(['error' => 'Cart kosong'], 400);
+            }
 
-        $total = 0;
-        foreach ($cart as $item) {
-            $total += $item['harga'] * $item['jumlah'];
-        }
-
-        $order = Order::create([
-            'nama' => $request->nama,
-            'telepon' => $request->telepon,
-            'alamat' => $request->alamat,
-            'catatan' => $request->catatan,
-            'total' => $total
-        ]);
-
-        foreach ($cart as $item) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'nama' => $item['nama'],
-                'harga' => $item['harga'],
-                'jumlah' => $item['jumlah']
+            $request->validate([
+                'nama' => 'required',
+                'telepon' => 'required',
+                'alamat' => 'required',
+                'payment_method' => 'required',
             ]);
+
+            // HITUNG TOTAL
+            $total = 0;
+            foreach ($cart as $item) {
+                $total += $item['harga'] * $item['jumlah'];
+            }
+
+            // SIMPAN ORDER
+            $order = Order::create([
+                'nama' => $request->nama,
+                'telepon' => $request->telepon,
+                'alamat' => $request->alamat,
+                'catatan' => $request->catatan,
+                'total' => $total,
+                'status' => 'pending',
+                'payment_method' => $request->payment_method,
+                'payment_status' => 'pending'
+            ]);
+
+            // SIMPAN ITEM
+            foreach ($cart as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'nama' => $item['nama'],
+                    'harga' => $item['harga'],
+                    'jumlah' => $item['jumlah']
+                ]);
+            }
+
+            // 🔥 EMAIL + WA
+            Mail::to('cobacobadulu148@gmail.com')->send(new OrderMail($order, $cart));
+            $this->notifAdmin($order);
+
+            // 🟢 COD
+            if ($request->payment_method == 'cod') {
+                session()->forget('cart');
+
+                return response()->json([
+                    'status' => 'cod'
+                ]);
+            }
+
+            // 🔵 MIDTRANS
+            Config::$serverKey = config('midtrans.serverKey');
+            Config::$isProduction = false;
+            Config::$isSanitized = true;
+            Config::$is3ds = true;
+
+            $items = [];
+            foreach ($cart as $item) {
+                $items[] = [
+                    'id' => $item['nama'],
+                    'price' => $item['harga'],
+                    'quantity' => $item['jumlah'],
+                    'name' => $item['nama']
+                ];
+            }
+
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $order->id,
+                    'gross_amount' => $total,
+                ],
+                'customer_details' => [
+                    'first_name' => $request->nama,
+                    'phone' => $request->telepon,
+                ],
+                'item_details' => $items
+            ];
+
+            $snapToken = Snap::getSnapToken($params);
+
+            return response()->json([
+                'status' => 'midtrans',
+                'snapToken' => $snapToken
+            ]);
+
+        } catch (\Exception $e) {
+
+            \Log::error($e->getMessage());
+
+            return response()->json([
+                'error' => 'Terjadi kesalahan di server'
+            ], 500);
         }
-
-        Mail::to('cobacobadulu148@gmail.com')->send(new OrderMail($order, $cart));
-
-        $this->notifAdmin($order);
-
-        session()->forget('cart');
-
-        return redirect('/produk?status=success');
     }
+
+    // =========================
+    // WHATSAPP
+    // =========================
 
     private function formatNomor($nomor)
     {
@@ -76,7 +142,6 @@ class CheckoutController extends Controller
         $nomor = $this->formatNomor(env('ADMIN_WA'));
 
         $pesan = "ORDER BARU MASUK\n\n";
-
         $pesan .= "Nama: {$order->nama}\n";
         $pesan .= "No HP: {$order->telepon}\n";
         $pesan .= "Alamat: {$order->alamat}\n\n";
@@ -88,7 +153,6 @@ class CheckoutController extends Controller
         }
 
         $pesan .= "\nTotal: Rp " . number_format($order->total);
-
         $pesan .= "\n\nCek di: " . url('/admin/pesanan');
 
         $this->kirimWhatsApp($nomor, $pesan);
@@ -113,7 +177,11 @@ class CheckoutController extends Controller
             ],
         ]);
 
-        curl_exec($curl);
+        $response = curl_exec($curl);
+
         curl_close($curl);
+
+        // LOG saja (tidak menghentikan program)
+        \Log::info($response);
     }
 }

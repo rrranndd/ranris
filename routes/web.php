@@ -28,6 +28,8 @@ Route::get('/login', [AuthController::class, 'loginForm']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/logout', [AuthController::class, 'logout']);
 
+Route::post('/midtrans/callback', [CheckoutController::class, 'callback']);
+
 Route::middleware(['admin'])->group(function () {
 
     Route::get('/admin', [AdminController::class, 'index']);
